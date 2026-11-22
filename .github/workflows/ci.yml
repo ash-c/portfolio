@@ -117,7 +117,7 @@ jobs:
 
   e2e-candidate-baselines:
     name: e2e candidate baselines (${{ matrix.project }})
-    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.candidate_baselines) }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_baselines }}
     needs: e2e-build
     runs-on: ubuntu-latest
     timeout-minutes: 20

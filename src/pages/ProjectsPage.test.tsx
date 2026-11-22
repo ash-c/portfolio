@@ -60,22 +60,24 @@ it('shows the portfolio as a summary-only card without any call to action', () =
   expect(screen.queryByRole('link', { name: 'Portfolio Website' })).not.toBeInTheDocument();
 });
 
-it('makes the whole APS card a single link to its detail page', () => {
+it('gives the APS card a single title link to its detail page', () => {
   renderWithProviders(<ProjectsPage />);
 
   const links = screen.getAllByRole('link');
   expect(links).toHaveLength(1);
   const [link] = links;
   expect(link).toHaveAccessibleName('Access APS NZ');
+  expect(link).toHaveTextContent(/^Access APS NZ$/);
   expect(link).toHaveAttribute('href', '/projects/access-aps-nz');
   expect(link).not.toHaveAttribute('target');
 
-  const card = within(link);
-  expect(card.getByRole('heading', { level: 2, name: 'Access APS NZ' })).toBeVisible();
+  const heading = screen.getByRole('heading', { level: 2, name: 'Access APS NZ' });
+  expect(heading).toContainElement(link);
+  const card = within(cardFor('Access APS NZ'));
   expect(card.getByText(/I primarily work on APS NZ Tax/)).toBeVisible();
   expect(card.getByText('Kafka')).toBeVisible();
   expect(card.getByText('Read more')).toBeVisible();
-  expect(card.queryByRole('link')).not.toBeInTheDocument();
+  expect(card.getAllByRole('link')).toEqual([link]);
   expect(card.queryByRole('button')).not.toBeInTheDocument();
   expect(screen.queryByText(/youtube/i)).not.toBeInTheDocument();
 });
@@ -128,13 +130,13 @@ it('renders any number of additional projects, preferring detail pages over exte
 
     const external = screen.getByRole('link', { name: 'External Tool' });
     expectSecureExternalLink(external, 'https://example.com/tool');
-    expect(within(external).getByText('View Project')).toBeVisible();
-    expect(within(external).getByText('Redis')).toBeVisible();
-    expect(within(external).queryByRole('link')).not.toBeInTheDocument();
+    expect(within(cardFor('External Tool')).getByText('View Project')).toBeVisible();
+    expect(within(cardFor('External Tool')).getByText('Redis')).toBeVisible();
+    expect(within(cardFor('External Tool')).getAllByRole('link')).toEqual([external]);
 
     const detailed = screen.getByRole('link', { name: 'Detailed Library' });
     expect(detailed).toHaveAttribute('href', '/projects/detailed-library');
-    expect(within(detailed).getByText('Read more')).toBeVisible();
+    expect(within(cardFor('Detailed Library')).getByText('Read more')).toBeVisible();
 
     expect(within(cardFor('Odd One Out')).queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getAllByRole('link')).toHaveLength(3);

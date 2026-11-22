@@ -57,6 +57,32 @@ module.exports = [
     },
   },
   {
-    ignores: ['node_modules/**', 'dist/**', 'build/**', '*.config.js'],
+    files: ['.devin/playwright.config.ts'],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      'import/no-default-export': 'off',
+    },
+  },
+  {
+    files: ['e2e/**/*.ts'],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      // Playwright fixtures call a `use` callback that is not React's `use` hook.
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  },
+  {
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'build/**',
+      'playwright-report/**',
+      'test-results/**',
+      '*.config.js',
+    ],
   },
 ];

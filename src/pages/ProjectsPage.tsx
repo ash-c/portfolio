@@ -18,68 +18,85 @@ const cardStyles = {
 
 const linkedCardStyles = {
   ...cardStyles,
-  color: 'inherit',
+  position: 'relative',
   transition: 'border-color 0.2s, box-shadow 0.2s',
-  _hover: { borderColor: 'primary.300', boxShadow: 'md', textDecoration: 'none' },
-  _focusVisible: { outline: '3px solid', outlineColor: 'primary.500', outlineOffset: '2px' },
+  _hover: { borderColor: 'primary.300', boxShadow: 'md' },
+  '&:has(a:focus-visible)': {
+    outline: '3px solid',
+    outlineColor: 'primary.500',
+    outlineOffset: '2px',
+  },
 } as const;
 
-type ProjectCardContentProps = {
-  project: Project;
-  titleId: string;
-  cue?: string;
+// The ::after overlay stretches the title link across the whole card, so the card stays
+// clickable while the link's accessible name matches its visible text.
+const stretchedLinkStyles = {
+  color: 'inherit',
+  textDecoration: 'none',
+  outline: 'none',
+  _after: { content: '""', position: 'absolute', inset: 0, borderRadius: 'lg' },
+} as const;
+
+type CardLink = {
+  href: string;
+  cue: string;
+  external?: boolean;
 };
 
-const ProjectCardContent = ({ project, titleId, cue }: ProjectCardContentProps) => (
-  <>
-    <Heading as="h2" id={titleId} size="md" mb={2}>
-      {project.title}
-    </Heading>
-    <Text mb={3}>{project.description}</Text>
-    <HStack gap={2} flexWrap="wrap" alignSelf="end">
-      {project.techStack.map((tech) => (
-        <Tag.Root key={tech} size="sm" variant="subtle" bg="highlight.100" color="highlight.900">
-          <Tag.Label>{tech}</Tag.Label>
-        </Tag.Root>
-      ))}
-    </HStack>
-    <Box pt={3} _empty={{ pt: 0 }}>
-      {cue && (
-        <Text as="span" fontWeight="semibold" color="primary.600">
-          {cue}
-        </Text>
-      )}
-    </Box>
-  </>
-);
-
-const ProjectCard = ({ project }: { project: Project }) => {
-  const titleId = `project-${project.slug}-title`;
+const cardLinkFor = (project: Project): CardLink | undefined => {
   const detailPath = getProjectDetailPath(project);
-
   if (detailPath) {
-    return (
-      <Box asChild {...linkedCardStyles}>
-        <RouterLink to={detailPath} aria-labelledby={titleId}>
-          <ProjectCardContent project={project} titleId={titleId} cue="Read more" />
-        </RouterLink>
-      </Box>
-    );
+    return { href: detailPath, cue: 'Read more' };
   }
-
   if (project.link) {
+    return { href: project.link, cue: 'View Project', external: true };
+  }
+  return undefined;
+};
+
+const ProjectCardTitle = ({ project, link }: { project: Project; link?: CardLink }) => {
+  if (!link) {
+    return project.title;
+  }
+  if (link.external) {
     return (
-      <Box asChild {...linkedCardStyles}>
-        <a href={project.link} target="_blank" rel="noopener noreferrer" aria-labelledby={titleId}>
-          <ProjectCardContent project={project} titleId={titleId} cue="View Project" />
+      <Box asChild {...stretchedLinkStyles}>
+        <a href={link.href} target="_blank" rel="noopener noreferrer">
+          {project.title}
         </a>
       </Box>
     );
   }
+  return (
+    <Box asChild {...stretchedLinkStyles}>
+      <RouterLink to={link.href}>{project.title}</RouterLink>
+    </Box>
+  );
+};
+
+const ProjectCard = ({ project }: { project: Project }) => {
+  const link = cardLinkFor(project);
 
   return (
-    <Box {...cardStyles}>
-      <ProjectCardContent project={project} titleId={titleId} />
+    <Box {...(link ? linkedCardStyles : cardStyles)}>
+      <Heading as="h2" size="md" mb={2}>
+        <ProjectCardTitle project={project} link={link} />
+      </Heading>
+      <Text mb={3}>{project.description}</Text>
+      <HStack gap={2} flexWrap="wrap" alignSelf="end">
+        {project.techStack.map((tech) => (
+          <Tag.Root key={tech} size="sm" variant="subtle" bg="highlight.100" color="highlight.900">
+            <Tag.Label>{tech}</Tag.Label>
+          </Tag.Root>
+        ))}
+      </HStack>
+      <Box pt={3} _empty={{ pt: 0 }}>
+        {link && (
+          <Text as="span" fontWeight="semibold" color="primary.600">
+            {link.cue}
+          </Text>
+        )}
+      </Box>
     </Box>
   );
 };

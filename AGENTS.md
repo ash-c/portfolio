@@ -45,6 +45,35 @@ Each production TypeScript file under `src/` must reach 80% statements, branches
 
 Run `npm run test:coverage` for the whole gate and open `coverage/index.html` for file-level details. The runner config in `.devin/`, DOM setup, and test conventions can be copied. Adapt the Chakra system and router wrapper for the destination project; no shared package is needed.
 
+## Browser tests (Playwright)
+
+Playwright tests in `e2e/` run against the production build in `dist/`, served as an SPA by `npm run serve:e2e` (`serve` on 127.0.0.1:4173 only). The config is `.devin/playwright.config.ts`. It starts that server itself and fails if something already listens on 4173: stop the other process instead of reusing it.
+
+- One-time browser setup: `npx playwright install --with-deps chromium firefox webkit` (`--with-deps` installs OS packages and needs sudo).
+- `npm run e2e` builds and then runs everything. If `dist/` is current, `npm run test:e2e` skips the build. A missing `dist/index.html` fails fast.
+- Single project or spec: `npm run test:e2e -- --project=firefox e2e/navigation.spec.ts`. Add `-g "<title>"` to pick one test.
+- Debug: `npm run test:e2e:ui` (UI mode) or `npm run test:e2e:debug` (inspector). `npm run test:e2e:report` opens the last HTML report from `playwright-report/`. Traces, failure screenshots, axe JSON and screenshot diffs go to `test-results/`. Both folders are git-ignored.
+- Projects: `chromium`, `firefox` and `webkit` use a fixed 1280×800 viewport. `mobile-chromium` is Chromium emulating a Pixel 7, not real Android or iOS hardware. All four run the functional and accessibility specs. Only the two Chromium projects run `visual.spec.ts`.
+- Tests use the shared `test` from `e2e/fixtures.ts`. It fails a test on any uncaught page error and blocks every non-local request, so no test loads LinkedIn, GitHub or other third-party pages. Check outbound links by `href`, `target` and `rel`; never click them.
+- Follow the unit-test locator rules: role and accessible name scoped to `banner`, `main` or `contentinfo`, web-first assertions, and no sleeps, forced clicks, CSS classes or test IDs.
+- CI (`.github/workflows/ci.yml`): `e2e-build` builds `dist/` once. The `e2e` matrix runs one job per project with one worker and at most one retry, and uploads `playwright-<project>` diagnostics (report and test results) for 7 days. `test.only` fails CI.
+
+### Accessibility failures
+
+`e2e/accessibility.spec.ts` runs axe with WCAG 2.0/2.1/2.2 A and AA tags on every route. It requires zero violations and attaches `axe-violations.json` when a scan fails. Fix the component; never disable rules, exclude selectors or filter by impact. Axe can't prove keyboard usability, so keep the keyboard tests in `responsive.spec.ts`. The project cards use a stretched title link (the `::after` overlay in `ProjectsPage.tsx`) so each card's accessible name matches its visible link text. Don't wrap a whole card in a link.
+
+### Visual baselines
+
+Baselines live in `e2e/__screenshots__/<spec>/<project>/` and are compared only on Linux. `visual.spec.ts` skips on other platforms, and screenshots from other hosts or other Linux setups aren't interchangeable. The CI runner (`ubuntu-latest` with Playwright's `--with-deps` packages) is the only authoritative environment. Comparisons never update snapshots, and a missing or mismatched baseline fails the test.
+
+To change baselines after an intentional UI change:
+
+1. Run the **CI** workflow manually (Actions → CI → Run workflow) on your branch with **candidate_baselines** checked. Its `e2e-candidate-baselines` jobs upload `candidate-baselines-<project>` artifacts. They never commit anything and need no write permission. Workflow dispatch only works once the workflow is on `main`. Until then, the failing PR run's `playwright-<project>` artifact holds the `*-actual.png` candidates.
+2. Review the expected, actual and diff images in the HTML report. Copy only the approved PNGs into `e2e/__screenshots__/` and commit them.
+3. Push and confirm the normal comparison jobs pass.
+
+`npm run test:e2e:update` regenerates baselines locally for experiments only. Don't commit its output unless your host matches the CI image.
+
 ## Site metadata and SITE_URL
 
 - `public/index.html` holds the static SEO and Open Graph tags (title, description, `og:*`) so crawlers read them without JavaScript. Every SPA route shares this site-level metadata; don't add a runtime head manager for it.

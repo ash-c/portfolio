@@ -68,7 +68,7 @@ Baselines live in `e2e/__screenshots__/<spec>/<project>/` and are compared only 
 
 To change baselines after an intentional UI change:
 
-1. Run the **CI** workflow manually (Actions → CI → Run workflow) on your branch with **candidate_baselines** checked. Its `e2e-candidate-baselines` jobs upload `candidate-baselines-<project>` artifacts. They never commit anything and need no write permission. Workflow dispatch only works once the workflow is on `main`. Until then, the failing PR run's `playwright-<project>` artifact holds the `*-actual.png` candidates.
+1. Run the **CI** workflow manually (Actions → CI → Run workflow) on your branch with **candidate_baselines** checked. Its `e2e-candidate-baselines` jobs upload `candidate-baselines-<project>` artifacts. They never commit anything and need no write permission. Workflow dispatch only works once the workflow is on `main`. For a changed screenshot, a failing PR run's `playwright-<project>` artifact also has `*-actual.png` and `*-diff.png`. For a new screenshot it has neither, because Playwright skips rendering when the baseline is missing and updates are off.
 2. Review the expected, actual and diff images in the HTML report. Copy only the approved PNGs into `e2e/__screenshots__/` and commit them.
 3. Push and confirm the normal comparison jobs pass.
 

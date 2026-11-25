@@ -74,6 +74,17 @@ To change baselines after an intentional UI change:
 
 `npm run test:e2e:update` regenerates baselines locally for experiments only. Don't commit its output unless your host matches the CI image.
 
+## Dependency updates
+
+`scripts/deps.mjs` (`npm run deps -- <command>`) does the deterministic part of dependency maintenance and prints Markdown tables for PR descriptions (`--json` for raw data). Versions come from `package-lock.json` and the npm registry, so no install is needed for `report`.
+
+- `report`: `npm audit` advisories (production or dev-only, fix available), patch and minor updates within each direct dependency's current major, and available majors. Changes nothing.
+- `security`: `npm audit fix` (never `--force`), then bumps exact or narrow direct pins to a non-major fixed version. Prints fixed and remaining advisories; a remaining row with a non-major fix needs an `overrides` entry or a parent bump.
+- `update [--exclude a,b]`: bumps direct dependencies to the newest release in their current major, keeping the `^`/`~`/exact prefix. `0.x` minors count as majors.
+- Add `--nested` to `security` or `update` if the hoisted install churns unrelated transitive lockfile entries. It regenerates the lockfile with `--install-strategy=nested`, then runs `npm ci`.
+
+The script never takes a major. Run `npm run check` after `security` or `update`, as for any change.
+
 ## Site metadata and SITE_URL
 
 - `public/index.html` holds the static SEO and Open Graph tags (title, description, `og:*`) so crawlers read them without JavaScript. Every SPA route shares this site-level metadata; don't add a runtime head manager for it.

@@ -9,8 +9,8 @@
     "serve:e2e": "serve dist --single --listen tcp://127.0.0.1:4173 --no-port-switching --no-clipboard",
     "lint": "eslint src/ e2e/ .devin/vitest.config.mts .devin/playwright.config.ts",
     "lint:fix": "eslint src/ e2e/ .devin/vitest.config.mts .devin/playwright.config.ts --fix",
-    "format": "prettier \"src/**/*.{ts,tsx}\" \"e2e/**/*.ts\" .devin/vitest.config.mts .devin/tsconfig.test.json .devin/playwright.config.ts .devin/tsconfig.e2e.json --write",
-    "format:check": "prettier \"src/**/*.{ts,tsx}\" \"e2e/**/*.ts\" .devin/vitest.config.mts .devin/tsconfig.test.json .devin/playwright.config.ts .devin/tsconfig.e2e.json --check",
+    "format": "prettier \"src/**/*.{ts,tsx}\" \"e2e/**/*.ts\" .devin/vitest.config.mts .devin/tsconfig.test.json .devin/playwright.config.ts .devin/tsconfig.e2e.json scripts/deps.mjs --write",
+    "format:check": "prettier \"src/**/*.{ts,tsx}\" \"e2e/**/*.ts\" .devin/vitest.config.mts .devin/tsconfig.test.json .devin/playwright.config.ts .devin/tsconfig.e2e.json scripts/deps.mjs --check",
     "test": "vitest run --config .devin/vitest.config.mts",
     "test:watch": "vitest --config .devin/vitest.config.mts",
     "test:coverage": "vitest run --coverage --config .devin/vitest.config.mts",
@@ -21,7 +21,8 @@
     "test:e2e:update": "playwright test --config .devin/playwright.config.ts --project=chromium --project=mobile-chromium --update-snapshots=all e2e/visual.spec.ts",
     "e2e": "npm run build && npm run test:e2e",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p .devin/tsconfig.test.json && tsc --noEmit -p .devin/tsconfig.e2e.json",
-    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test:coverage && npm run build"
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test:coverage && npm run build",
+    "deps": "node scripts/deps.mjs"
   },
   "repository": {
     "type": "git",

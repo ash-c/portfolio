@@ -76,14 +76,7 @@ To change baselines after an intentional UI change:
 
 ## Dependency updates
 
-`scripts/deps.mjs` (`npm run deps -- <command>`) does the deterministic part of dependency maintenance and prints Markdown tables for PR descriptions (`--json` for raw data). Versions come from `package-lock.json` and the npm registry, so no install is needed for `report`.
-
-- `report`: `npm audit` advisories (production or dev-only, fix available), patch and minor updates within each direct dependency's current major, and available majors. Changes nothing.
-- `security`: `npm audit fix` (never `--force`), then bumps exact or narrow direct pins to a non-major fixed version. Prints fixed and remaining advisories; a remaining row with a non-major fix needs an `overrides` entry or a parent bump.
-- `update [--exclude a,b]`: bumps direct dependencies to the newest release in their current major, keeping the `^`/`~`/exact prefix. `0.x` minors count as majors.
-- Add `--nested` to `security` or `update` if the hoisted install churns unrelated transitive lockfile entries. It regenerates the lockfile with `--install-strategy=nested`, then runs `npm ci`.
-
-The script never takes a major. Run `npm run check` after `security` or `update`, as for any change.
+Use the shared npm script from the sibling Home Repo, run from this repo's root: `node ../home-repo/scripts/npm-deps.mjs <report|security|update>` (see `../home-repo/AGENTS.md`). Run `npm run check` after `security` or `update`. Keep the existing `overrides` and the nested-install fallback in mind: pass `--nested` if a hoisted install churns unrelated transitive lockfile entries.
 
 ## Site metadata and SITE_URL
 

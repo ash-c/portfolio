@@ -74,6 +74,10 @@ To change baselines after an intentional UI change:
 
 `npm run test:e2e:update` regenerates baselines locally for experiments only. Don't commit its output unless your host matches the CI image.
 
+## Dependency updates
+
+Use the shared npm script from the sibling Home Repo, run from this repo's root: `node ../home-repo/scripts/npm-deps.mjs <report|security|update>` (see `../home-repo/AGENTS.md`). Run `npm run check` after `security` or `update`. Keep the existing `overrides` and the nested-install fallback in mind: pass `--nested` if a hoisted install churns unrelated transitive lockfile entries.
+
 ## Site metadata and SITE_URL
 
 - `public/index.html` holds the static SEO and Open Graph tags (title, description, `og:*`) so crawlers read them without JavaScript. Every SPA route shares this site-level metadata; don't add a runtime head manager for it.

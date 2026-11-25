@@ -18,7 +18,7 @@ Ash Crockett's portfolio: a React 19 + TypeScript SPA styled with Chakra UI 3 (E
 
 ## Decisions
 
-Read the relevant records in `docs/adr/` before changing tooling or structure. Add a new ADR (copy `docs/adr/0000-template.md`) for any significant decision, and mark ones it replaces as Superseded.
+Read the relevant records in `docs/adr/` before changing tooling or structure. Add a new ADR in `docs/adr/` (copy the sibling Home Repo template `../home-repo/docs/adr/0000-template.md`) for any significant decision, and mark ones it replaces as Superseded.
 
 ## Project checks and UI tests
 
